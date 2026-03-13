@@ -8,14 +8,10 @@
   <body>
     <div class="app-shell">
       <main class="panel">
-        <section class="hero">
-          <p class="eyebrow">Desktop PDF Converter</p>
-          <h1>Wizard konversi PDF ke EPUB untuk Kindle.</h1>
-          <p class="hero-copy">
-            Sekarang flow-nya bisa jalan untuk single file atau batch queue, dengan cover
-            otomatis, metadata lengkap, mode OCR, dan target device Kindle yang lebih spesifik.
-          </p>
-        </section>
+        <header class="app-header">
+          <h1>Kindle Create</h1>
+          <p class="app-tagline">PDF → EPUB Converter</p>
+        </header>
 
         <form id="convert-form" class="wizard-shell">
           <nav class="wizard-nav" aria-label="Langkah konversi">
@@ -54,33 +50,29 @@
               <div class="step-header">
                 <div>
                   <p class="step-kicker">Langkah 1</p>
-                  <h2>Cek dependency desktop</h2>
-                  <p class="subtle">
-                    App ini butuh Calibre <code>ebook-convert</code>. Helper PDF native dan OCR
-                    built-in berjalan lokal dari aplikasi.
-                  </p>
+                  <h2>Cek Dependency</h2>
+                  <p class="subtle">Memastikan Calibre <code>ebook-convert</code> tersedia.</p>
                 </div>
                 <span id="dependency-pill" class="pill">Checking</span>
               </div>
 
               <div class="dependency-grid">
                 <div class="info-card">
-                  <span class="info-label">Status Engine</span>
-                  <strong id="dependency-title">Sedang memeriksa Calibre...</strong>
-                  <p id="dependency-copy" class="subtle">Tunggu sebentar sampai pengecekan selesai.</p>
+                  <span class="info-label">Status</span>
+                  <strong id="dependency-title">Memeriksa Calibre...</strong>
+                  <p id="dependency-copy" class="subtle"></p>
                 </div>
                 <div class="info-card">
-                  <span class="info-label">Versi Terdeteksi</span>
-                  <strong id="dependency-version">Belum ada</strong>
-                  <p class="subtle">Kalau kosong, binary converter belum ditemukan aplikasi.</p>
+                  <span class="info-label">Versi</span>
+                  <strong id="dependency-version">—</strong>
                 </div>
               </div>
 
               <div id="dependency-status" class="status-box" aria-live="polite"></div>
 
               <div class="step-actions">
-                <button id="refresh-deps" class="ghost-button" type="button">Refresh Check</button>
-                <button id="to-step-2" class="primary-button" type="button">Lanjut Pilih PDF</button>
+                <button id="refresh-deps" class="ghost-button" type="button">Refresh</button>
+                <button id="to-step-2" class="primary-button" type="button">Lanjut →</button>
               </div>
             </article>
 
@@ -88,10 +80,8 @@
               <div class="step-header">
                 <div>
                   <p class="step-kicker">Langkah 2</p>
-                  <h2>Pilih dokumen sumber</h2>
-                  <p class="subtle">
-                    Gunakan single file untuk atur cover manual, atau batch queue kalau mau memproses banyak PDF sekaligus.
-                  </p>
+                  <h2>Pilih Dokumen</h2>
+                  <p class="subtle">Drop PDF atau pilih file secara manual.</p>
                 </div>
                 <span id="document-pill" class="pill">Belum siap</span>
               </div>
@@ -100,101 +90,100 @@
                 <div id="drop-zone" class="drop-zone" aria-live="polite">
                   <strong id="drop-zone-title">Drop PDF di sini</strong>
                   <p id="drop-zone-copy" class="subtle">
-                    Drag file `.pdf` ke aplikasi. Kalau lebih dari satu file, app akan membentuk batch queue.
+                    Atau klik tombol di bawah untuk memilih file.
                   </p>
                 </div>
 
                 <div class="step-actions compact-actions">
                   <button id="pick-input" class="ghost-button" type="button">Pilih 1 PDF</button>
-                  <button id="pick-batch" class="ghost-button" type="button">Tambah Batch PDF</button>
-                  <button id="reset-queue" class="ghost-button" type="button">Reset Queue</button>
+                  <button id="pick-batch" class="ghost-button" type="button">Batch PDF</button>
+                  <button id="reset-queue" class="ghost-button" type="button">Reset</button>
                 </div>
 
                 <div class="grid grid-2-1">
                   <div class="form-stack">
                     <label class="field">
-                      <span>File PDF aktif</span>
+                      <span>File PDF</span>
                       <div class="path-row">
                         <input id="input-path" name="inputPath" readonly />
                       </div>
                     </label>
 
                     <label class="field">
-                      <span>Output EPUB aktif</span>
+                      <span>Output EPUB</span>
                       <div class="path-row">
                         <input id="output-path" name="outputPath" readonly />
-                        <button id="pick-output" type="button">Tentukan Lokasi</button>
+                        <button id="pick-output" type="button">Pilih</button>
                       </div>
                     </label>
 
                     <label class="field">
-                      <span>Folder Output Batch</span>
+                      <span>Folder Batch</span>
                       <div class="path-row">
                         <input id="batch-output-dir" readonly />
-                        <button id="pick-batch-output" type="button">Pilih Folder</button>
+                        <button id="pick-batch-output" type="button">Pilih</button>
                       </div>
                     </label>
                   </div>
 
                   <div class="info-card">
-                    <span class="info-label">Analisis Dokumen</span>
+                    <span class="info-label">Analisis</span>
                     <strong id="scan-analysis-title">Belum ada PDF</strong>
-                    <p id="scan-analysis-copy" class="subtle">
-                      Setelah PDF dibaca, aplikasi akan mendeteksi indikasi scan dan saran cover awal.
-                    </p>
+                    <p id="scan-analysis-copy" class="subtle"></p>
                     <div class="meta-list">
                       <span id="queue-summary" class="meta-chip">Queue: 0</span>
                       <span id="smart-cover-chip" class="meta-chip">Cover: -</span>
-                      <span id="scan-chip" class="meta-chip">OCR: belum dianalisis</span>
+                      <span id="scan-chip" class="meta-chip">OCR: -</span>
                     </div>
                   </div>
                 </div>
 
-                <div class="grid">
-                  <label class="field">
-                    <span>Judul Buku</span>
-                    <input id="title" name="title" placeholder="Opsional, metadata EPUB" />
-                  </label>
+                <details class="metadata-section">
+                  <summary class="metadata-toggle">Metadata Buku <span class="subtle-inline">(opsional)</span></summary>
+                  <div class="metadata-fields">
+                    <div class="grid">
+                      <label class="field">
+                        <span>Judul</span>
+                        <input id="title" name="title" placeholder="Judul buku" />
+                      </label>
 
-                  <label class="field">
-                    <span>Penulis</span>
-                    <input id="author" name="author" placeholder="Opsional, metadata EPUB" />
-                  </label>
+                      <label class="field">
+                        <span>Penulis</span>
+                        <input id="author" name="author" placeholder="Nama penulis" />
+                      </label>
 
-                  <label class="field">
-                    <span>Bahasa</span>
-                    <input id="language" name="language" placeholder="Mis. id, en, id-ID" />
-                  </label>
+                      <label class="field">
+                        <span>Bahasa</span>
+                        <input id="language" name="language" placeholder="id, en, id-ID" />
+                      </label>
 
-                  <label class="field">
-                    <span>Publisher</span>
-                    <input id="publisher" name="publisher" placeholder="Opsional" />
-                  </label>
+                      <label class="field">
+                        <span>Publisher</span>
+                        <input id="publisher" name="publisher" placeholder="Penerbit" />
+                      </label>
 
-                  <label class="field">
-                    <span>Series</span>
-                    <input id="series" name="series" placeholder="Opsional" />
-                  </label>
+                      <label class="field">
+                        <span>Series</span>
+                        <input id="series" name="series" placeholder="Nama seri" />
+                      </label>
 
-                  <label class="field">
-                    <span>Tags</span>
-                    <input id="tags" name="tags" placeholder="Pisahkan dengan koma" />
-                  </label>
-                </div>
+                      <label class="field">
+                        <span>Tags</span>
+                        <input id="tags" name="tags" placeholder="Pisahkan dengan koma" />
+                      </label>
+                    </div>
 
-                <label class="field">
-                  <span>Description</span>
-                  <textarea id="description" name="description" rows="5" placeholder="Ringkasan buku atau catatan metadata opsional"></textarea>
-                </label>
+                    <label class="field">
+                      <span>Deskripsi</span>
+                      <textarea id="description" name="description" rows="3" placeholder="Ringkasan buku (opsional)"></textarea>
+                    </label>
+                  </div>
+                </details>
 
                 <section class="queue-panel">
                   <div class="step-header">
                     <div>
-                      <p class="step-kicker">Queue</p>
-                      <h3>Dokumen yang akan diproses</h3>
-                      <p class="subtle">
-                        Saat queue berisi lebih dari satu file, app akan convert satu per satu dengan cover rekomendasi otomatis.
-                      </p>
+                      <h3>Queue</h3>
                     </div>
                     <span id="batch-pill" class="pill">Single</span>
                   </div>
@@ -203,8 +192,8 @@
               </div>
 
               <div class="step-actions">
-                <button class="ghost-button" data-step-back="1" type="button">Kembali</button>
-                <button id="to-step-3" class="primary-button" type="button">Lanjut Atur Cover</button>
+                <button class="ghost-button" data-step-back="1" type="button">← Kembali</button>
+                <button id="to-step-3" class="primary-button" type="button">Lanjut →</button>
               </div>
             </article>
 
@@ -212,10 +201,8 @@
               <div class="step-header">
                 <div>
                   <p class="step-kicker">Langkah 3</p>
-                  <h2>Tentukan cover EPUB</h2>
-                  <p id="pdf-meta" class="subtle">
-                    Default cover memakai halaman 1 PDF. Kamu bisa ganti sebelum convert.
-                  </p>
+                  <h2>Cover EPUB</h2>
+                  <p id="pdf-meta" class="subtle">Pilih halaman PDF sebagai cover.</p>
                 </div>
                 <span id="cover-summary" class="pill">Belum ada preview</span>
               </div>
@@ -223,47 +210,43 @@
               <div class="cover-layout">
                 <div class="cover-preview-frame">
                   <div id="cover-preview-placeholder" class="cover-preview-placeholder">
-                    Pilih PDF untuk memuat preview cover.
+                    Pilih PDF untuk melihat preview.
                   </div>
                   <img id="cover-preview-image" alt="Preview cover EPUB" hidden />
                 </div>
 
                 <div class="cover-controls">
-                  <div class="info-card">
+                  <div class="info-card compact-card">
                     <span class="info-label">Smart Cover</span>
-                    <strong id="smart-cover-title">Belum ada saran otomatis.</strong>
-                    <p id="smart-cover-copy" class="subtle">
-                      App akan menganalisis halaman awal untuk mencari cover yang paling masuk akal.
-                    </p>
+                    <strong id="smart-cover-title">Belum ada saran.</strong>
+                    <p id="smart-cover-copy" class="subtle"></p>
                     <button id="use-suggested-cover" class="ghost-button" type="button">
                       Pakai Saran Otomatis
                     </button>
                   </div>
 
-                  <div class="info-card">
+                  <div class="info-card compact-card">
                     <span class="info-label">Mode Batch</span>
                     <strong id="batch-cover-mode-title">Manual cover aktif.</strong>
-                    <p id="batch-cover-mode-copy" class="subtle">
-                      Kalau queue batch aktif, item selain PDF aktif akan memakai cover rekomendasi masing-masing.
-                    </p>
+                    <p id="batch-cover-mode-copy" class="subtle"></p>
                   </div>
 
                   <label class="field">
                     <span>Halaman Cover</span>
                     <div class="stepper-row">
-                      <button id="prev-cover-page" class="ghost-button" type="button">Sebelumnya</button>
+                      <button id="prev-cover-page" class="ghost-button" type="button">◀</button>
                       <input id="cover-page" min="1" name="coverPage" step="1" type="number" value="1" />
-                      <button id="next-cover-page" class="ghost-button" type="button">Berikutnya</button>
+                      <button id="next-cover-page" class="ghost-button" type="button">▶</button>
                     </div>
                   </label>
 
-                  <button id="load-cover-preview" class="ghost-button" type="button">Muat Preview Cover</button>
+                  <button id="load-cover-preview" class="ghost-button" type="button">Muat Preview</button>
                 </div>
               </div>
 
               <div class="step-actions">
-                <button class="ghost-button" data-step-back="2" type="button">Kembali</button>
-                <button id="to-step-4" class="primary-button" type="button">Lanjut Konversi</button>
+                <button class="ghost-button" data-step-back="2" type="button">← Kembali</button>
+                <button id="to-step-4" class="primary-button" type="button">Lanjut →</button>
               </div>
             </article>
 
@@ -271,73 +254,53 @@
               <div class="step-header">
                 <div>
                   <p class="step-kicker">Langkah 4</p>
-                  <h2>Konversi dan pantau proses</h2>
-                  <p class="subtle">
-                    Preset output, target Kindle, dan OCR sekarang dipilih sebelum konversi dijalankan.
-                  </p>
+                  <h2>Konversi</h2>
+                  <p class="subtle">Pilih pengaturan lalu jalankan konversi.</p>
                 </div>
                 <span id="activity-badge" class="pill">Idle</span>
               </div>
 
               <div class="settings-grid">
                 <section class="preset-panel">
-                  <div class="step-header">
-                    <div>
-                      <p class="step-kicker">Preset Output</p>
-                      <h3>Atur prioritas hasil EPUB</h3>
-                      <p id="preset-summary" class="subtle">Seimbang dipakai sebagai default untuk mayoritas PDF.</p>
-                    </div>
-                  </div>
-
+                  <h3 class="panel-title">Preset Output</h3>
                   <div class="preset-grid" role="radiogroup" aria-label="Preset output EPUB">
                     <button class="preset-option" data-preset="small" type="button">
-                      <strong>Ukuran Kecil</strong>
-                      <small>Lebih hemat storage, gambar diperkecil lebih agresif.</small>
+                      <strong>Kecil</strong>
+                      <small>Hemat storage</small>
                     </button>
                     <button class="preset-option" data-preset="balanced" type="button">
                       <strong>Seimbang</strong>
-                      <small>Ukuran dan kualitas seimbang untuk kebanyakan PDF.</small>
+                      <small>Default</small>
                     </button>
                     <button class="preset-option" data-preset="quality" type="button">
-                      <strong>Kualitas Tinggi</strong>
-                      <small>Pertahankan detail gambar lebih tinggi, file biasanya lebih besar.</small>
+                      <strong>Kualitas</strong>
+                      <small>Detail tinggi</small>
                     </button>
                   </div>
                 </section>
 
                 <section class="preset-panel">
-                  <div class="step-header">
-                    <div>
-                      <p class="step-kicker">Target Kindle</p>
-                      <h3>Optimasi profil output</h3>
-                      <p id="kindle-summary" class="subtle">
-                        General Kindle aman untuk mayoritas device. Paperwhite dan Scribe lebih spesifik.
-                      </p>
-                    </div>
-                  </div>
-
+                  <h3 class="panel-title">Target Kindle</h3>
                   <div class="preset-grid" role="radiogroup" aria-label="Target Kindle">
                     <button class="kindle-option" data-kindle-profile="general" type="button">
-                      <strong>General Kindle</strong>
-                      <small>Profil paling aman untuk device Kindle umum.</small>
+                      <strong>General</strong>
+                      <small>Semua device</small>
                     </button>
                     <button class="kindle-option" data-kindle-profile="paperwhite" type="button">
                       <strong>Paperwhite</strong>
-                      <small>Gambar, margin, dan line height di-tune untuk Paperwhite.</small>
+                      <small>Optimasi PW</small>
                     </button>
                     <button class="kindle-option" data-kindle-profile="scribe" type="button">
                       <strong>Scribe</strong>
-                      <small>Resolusi dan tata ruang lebih lega untuk layar besar.</small>
+                      <small>Layar besar</small>
                     </button>
                   </div>
 
                   <label class="toggle-card">
                     <input id="use-ocr" type="checkbox" />
                     <div>
-                      <strong>Gunakan OCR</strong>
-                      <p id="ocr-summary" class="subtle">
-                        Cocok untuk PDF scan. App akan membuat sumber HTML dari hasil OCR native sebelum convert.
-                      </p>
+                      <strong>OCR</strong>
+                      <p id="ocr-summary" class="subtle">Untuk PDF scan.</p>
                     </div>
                   </label>
                 </section>
@@ -346,13 +309,11 @@
               <div class="activity-header">
                 <div>
                   <p id="activity-title" class="activity-title">Belum ada proses.</p>
-                  <p id="activity-subtitle" class="subtle">
-                    Jalankan konversi setelah PDF, output, dan cover sudah siap.
-                  </p>
+                  <p id="activity-subtitle" class="subtle"></p>
                 </div>
                 <div class="action-cluster">
                   <button id="open-output" class="ghost-button" type="button">Buka EPUB</button>
-                  <button id="reveal-output" class="ghost-button" type="button">Reveal in Finder</button>
+                  <button id="reveal-output" class="ghost-button" type="button">Reveal</button>
                 </div>
               </div>
 
@@ -364,36 +325,24 @@
 
               <section class="queue-panel">
                 <div class="step-header">
-                  <div>
-                    <p class="step-kicker">Batch Progress</p>
-                    <h3>Status per file</h3>
-                    <p class="subtle">
-                      Queue ini aktif saat kamu memilih banyak PDF sekaligus.
-                    </p>
-                  </div>
-                  <button id="retry-failed" class="ghost-button" type="button">Retry Failed</button>
+                  <h3>Batch Progress</h3>
+                  <button id="retry-failed" class="ghost-button" type="button">Retry</button>
                 </div>
                 <div id="batch-progress" class="queue-list"></div>
               </section>
 
               <section class="history-panel">
                 <div class="step-header">
-                  <div>
-                    <p class="step-kicker">Riwayat</p>
-                    <h3>Convert terakhir</h3>
-                    <p class="subtle">
-                      Menampilkan hasil sukses, gagal, atau dibatalkan beserta ukuran file dan aksi cepat.
-                    </p>
-                  </div>
+                  <h3>Riwayat</h3>
                 </div>
                 <div id="history-list" class="history-list" aria-live="polite"></div>
               </section>
 
               <div class="step-actions">
-                <button class="ghost-button" data-step-back="3" type="button">Kembali</button>
+                <button class="ghost-button" data-step-back="3" type="button">← Kembali</button>
                 <div class="action-cluster">
-                  <button id="cancel-button" class="ghost-button" type="button">Batalkan Konversi</button>
-                  <button id="submit-button" class="primary-button" type="submit">Konversi ke EPUB</button>
+                  <button id="cancel-button" class="ghost-button" type="button">Batal</button>
+                  <button id="submit-button" class="primary-button" type="submit">Konversi →</button>
                 </div>
               </div>
             </article>
