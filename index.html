@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kindle Create</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <main class="panel">
+        <section class="hero">
+          <p class="eyebrow">Desktop PDF Converter</p>
+          <h1>Wizard konversi PDF ke EPUB untuk Kindle.</h1>
+          <p class="hero-copy">
+            Ikuti langkahnya satu per satu: cek environment, pilih PDF, atur cover,
+            lalu jalankan konversi dengan log proses yang jelas.
+          </p>
+        </section>
+
+        <form id="convert-form" class="wizard-shell">
+          <nav class="wizard-nav" aria-label="Langkah konversi">
+            <button class="wizard-step" data-step-target="1" type="button">
+              <span class="wizard-step-number">1</span>
+              <span class="wizard-step-copy">
+                <strong>Dependency</strong>
+                <small>Cek Calibre dan converter</small>
+              </span>
+            </button>
+            <button class="wizard-step" data-step-target="2" type="button">
+              <span class="wizard-step-number">2</span>
+              <span class="wizard-step-copy">
+                <strong>Dokumen</strong>
+                <small>Pilih PDF dan output</small>
+              </span>
+            </button>
+            <button class="wizard-step" data-step-target="3" type="button">
+              <span class="wizard-step-number">3</span>
+              <span class="wizard-step-copy">
+                <strong>Cover</strong>
+                <small>Tentukan halaman cover</small>
+              </span>
+            </button>
+            <button class="wizard-step" data-step-target="4" type="button">
+              <span class="wizard-step-number">4</span>
+              <span class="wizard-step-copy">
+                <strong>Konversi</strong>
+                <small>Jalankan dan pantau proses</small>
+              </span>
+            </button>
+          </nav>
+
+          <section class="wizard-stage">
+            <article class="step-card" data-step="1">
+              <div class="step-header">
+                <div>
+                  <p class="step-kicker">Langkah 1</p>
+                  <h2>Cek dependency desktop</h2>
+                  <p class="subtle">
+                    App ini butuh Calibre <code>ebook-convert</code> agar proses PDF ke EPUB bisa jalan lokal.
+                  </p>
+                </div>
+                <span id="dependency-pill" class="pill">Checking</span>
+              </div>
+
+              <div class="dependency-grid">
+                <div class="info-card">
+                  <span class="info-label">Status Engine</span>
+                  <strong id="dependency-title">Sedang memeriksa Calibre...</strong>
+                  <p id="dependency-copy" class="subtle">
+                    Tunggu sebentar sampai pengecekan selesai.
+                  </p>
+                </div>
+                <div class="info-card">
+                  <span class="info-label">Versi Terdeteksi</span>
+                  <strong id="dependency-version">Belum ada</strong>
+                  <p class="subtle">
+                    Jika kosong, artinya aplikasi belum menemukan binary converter.
+                  </p>
+                </div>
+              </div>
+
+              <div id="dependency-status" class="status-box" aria-live="polite"></div>
+
+              <div class="step-actions">
+                <button id="refresh-deps" class="ghost-button" type="button">
+                  Refresh Check
+                </button>
+                <button id="to-step-2" class="primary-button" type="button">
+                  Lanjut Pilih PDF
+                </button>
+              </div>
+            </article>
+
+            <article class="step-card" data-step="2" hidden>
+              <div class="step-header">
+                <div>
+                  <p class="step-kicker">Langkah 2</p>
+                  <h2>Pilih dokumen sumber</h2>
+                  <p class="subtle">
+                    Tentukan PDF yang akan dikonversi, lokasi output EPUB, dan metadata dasar bukunya.
+                  </p>
+                </div>
+                <span id="document-pill" class="pill">Belum siap</span>
+              </div>
+
+              <div class="form-stack">
+                <label class="field">
+                  <span>File PDF</span>
+                  <div class="path-row">
+                    <input id="input-path" name="inputPath" readonly />
+                    <button id="pick-input" type="button">Pilih PDF</button>
+                  </div>
+                </label>
+
+                <label class="field">
+                  <span>Output EPUB</span>
+                  <div class="path-row">
+                    <input id="output-path" name="outputPath" readonly />
+                    <button id="pick-output" type="button">Tentukan Lokasi</button>
+                  </div>
+                </label>
+
+                <div class="grid">
+                  <label class="field">
+                    <span>Judul Buku</span>
+                    <input
+                      id="title"
+                      name="title"
+                      placeholder="Opsional, untuk metadata EPUB"
+                    />
+                  </label>
+
+                  <label class="field">
+                    <span>Penulis</span>
+                    <input
+                      id="author"
+                      name="author"
+                      placeholder="Opsional, untuk metadata EPUB"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div class="step-actions">
+                <button class="ghost-button" data-step-back="1" type="button">
+                  Kembali
+                </button>
+                <button id="to-step-3" class="primary-button" type="button">
+                  Lanjut Atur Cover
+                </button>
+              </div>
+            </article>
+
+            <article class="step-card" data-step="3" hidden>
+              <div class="step-header">
+                <div>
+                  <p class="step-kicker">Langkah 3</p>
+                  <h2>Tentukan cover EPUB</h2>
+                  <p id="pdf-meta" class="subtle">
+                    Default cover memakai halaman 1 PDF. Kamu bisa ganti sebelum convert.
+                  </p>
+                </div>
+                <span id="cover-summary" class="pill">Belum ada preview</span>
+              </div>
+
+              <div class="cover-layout">
+                <div class="cover-preview-frame">
+                  <div id="cover-preview-placeholder" class="cover-preview-placeholder">
+                    Pilih PDF untuk memuat preview cover.
+                  </div>
+                  <img id="cover-preview-image" alt="Preview cover EPUB" hidden />
+                </div>
+
+                <div class="cover-controls">
+                  <div class="info-card">
+                    <span class="info-label">Tips Cover</span>
+                    <strong>Pilih halaman yang paling representatif.</strong>
+                    <p class="subtle">
+                      Biasanya halaman 1 cocok, tapi kamu bisa ambil halaman ilustrasi atau cover internal lain.
+                    </p>
+                  </div>
+
+                  <label class="field">
+                    <span>Halaman Cover</span>
+                    <div class="stepper-row">
+                      <button id="prev-cover-page" class="ghost-button" type="button">
+                        Sebelumnya
+                      </button>
+                      <input
+                        id="cover-page"
+                        min="1"
+                        name="coverPage"
+                        step="1"
+                        type="number"
+                        value="1"
+                      />
+                      <button id="next-cover-page" class="ghost-button" type="button">
+                        Berikutnya
+                      </button>
+                    </div>
+                  </label>
+
+                  <button id="load-cover-preview" class="ghost-button" type="button">
+                    Muat Preview Cover
+                  </button>
+                </div>
+              </div>
+
+              <div class="step-actions">
+                <button class="ghost-button" data-step-back="2" type="button">
+                  Kembali
+                </button>
+                <button id="to-step-4" class="primary-button" type="button">
+                  Lanjut Konversi
+                </button>
+              </div>
+            </article>
+
+            <article class="step-card" data-step="4" hidden>
+              <div class="step-header">
+                <div>
+                  <p class="step-kicker">Langkah 4</p>
+                  <h2>Konversi dan pantau proses</h2>
+                  <p class="subtle">
+                    Jalankan konversi setelah semua langkah di atas siap. Log proses akan muncul live di panel ini.
+                  </p>
+                </div>
+                <span id="activity-badge" class="pill">Idle</span>
+              </div>
+
+              <div class="activity-header">
+                <div>
+                  <p id="activity-title" class="activity-title">Belum ada proses.</p>
+                  <p id="activity-subtitle" class="subtle">
+                    Jalankan konversi setelah PDF, output, dan cover sudah siap.
+                  </p>
+                </div>
+              </div>
+
+              <div id="progress-track" class="progress-track" data-active="false">
+                <div class="progress-bar"></div>
+              </div>
+
+              <div id="conversion-status" class="log-box" aria-live="polite"></div>
+
+              <div class="step-actions">
+                <button class="ghost-button" data-step-back="3" type="button">
+                  Kembali
+                </button>
+                <button id="submit-button" class="primary-button" type="submit">
+                  Konversi ke EPUB
+                </button>
+              </div>
+            </article>
+          </section>
+        </form>
+      </main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
