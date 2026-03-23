@@ -141,8 +141,6 @@ const batchPill = query<HTMLSpanElement>("#batch-pill");
 const dropZone = query<HTMLDivElement>("#drop-zone");
 const dropZoneTitle = query<HTMLElement>("#drop-zone-title");
 const dropZoneCopy = query<HTMLParagraphElement>("#drop-zone-copy");
-const presetSummary = query<HTMLParagraphElement>("#preset-summary");
-const kindleSummary = query<HTMLParagraphElement>("#kindle-summary");
 const ocrSummary = query<HTMLParagraphElement>("#ocr-summary");
 const queueSummaryChip = query<HTMLSpanElement>("#queue-summary");
 const smartCoverChip = query<HTMLSpanElement>("#smart-cover-chip");
@@ -368,8 +366,6 @@ const syncPresetUi = () => {
     button.setAttribute("aria-pressed", active ? "true" : "false");
   });
 
-  const meta = presetMeta[selectedPreset];
-  presetSummary.textContent = `${meta.title}: ${meta.summary}`;
 };
 
 const syncKindleUi = () => {
@@ -379,8 +375,6 @@ const syncKindleUi = () => {
     button.setAttribute("aria-pressed", active ? "true" : "false");
   });
 
-  const meta = kindleMeta[selectedKindleProfile];
-  kindleSummary.textContent = `${meta.title}: ${meta.summary}`;
 };
 
 const renderHistory = () => {
