@@ -1,43 +1,45 @@
 # Kindle Create
 
-Desktop app berbasis Tauri untuk mengubah PDF menjadi EPUB yang lebih mudah dibaca di Kindle.
+A desktop PDF-to-EPUB converter built for Kindle workflows. Select a PDF, configure metadata and output settings, and generate a Kindle-ready EPUB.
 
-## Arsitektur
+## Tech Stack
 
-- Frontend: Vite + TypeScript tanpa framework.
-- Desktop shell: Tauri v2.
-- Engine konversi: Calibre `ebook-convert` yang dipanggil dari command Rust.
+- **Frontend:** TypeScript + Vite (no framework)
+- **Backend:** Rust + [Tauri 2](https://tauri.app/)
+- **Conversion:** Wraps Calibre's `ebook-convert` CLI, with optional Ghostscript and Tesseract OCR
 
-Pendekatan ini dipilih karena konversi PDF ke EPUB yang bagus cukup sulit jika hanya mengandalkan parsing PDF sendiri. Calibre sudah menangani banyak edge case layout, image, dan metadata lebih baik untuk use case awal.
+## Features
 
-## Setup lokal
+- PDF to EPUB conversion with live progress and log output
+- Metadata editing (title, author, language, publisher, series, tags, description)
+- Cover page selection with PDF preview
+- Output presets (small, balanced, quality) and Kindle device profiles
+- Optional OCR for scanned PDFs
+- Batch conversion with drag-and-drop
+- Conversion history
 
-1. Install Node.js 20+.
-2. Install Rust toolchain dari https://rustup.rs.
-3. Install Calibre, lalu pastikan command `ebook-convert` tersedia di terminal.
-4. Install dependency frontend:
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) (v20+)
+- [Rust](https://www.rust-lang.org/tools/install)
+- [Calibre](https://calibre-ebook.com/) — provides the `ebook-convert` command
+- [Ghostscript](https://www.ghostscript.com/) — for PDF preview rendering
+- [Tesseract](https://github.com/tesseract-ocr/tesseract) — optional, for OCR on scanned PDFs
+
+## Getting Started
 
 ```bash
+# Install frontend dependencies
 npm install
-```
 
-5. Jalankan mode development:
-
-```bash
+# Run in development mode
 npm run tauri:dev
+
+# Build for production
+npm run tauri:build
 ```
 
-## Alur aplikasi
+## Notes
 
-1. Pilih file PDF.
-2. Preview cover EPUB dari halaman PDF pertama akan dimuat otomatis.
-3. Jika perlu, pilih halaman lain untuk cover lalu muat preview ulang.
-4. Tentukan lokasi output EPUB.
-5. Isi metadata judul atau penulis bila perlu.
-6. Jalankan konversi sambil memantau status dan log proses live di panel aktivitas.
-
-## Catatan kualitas hasil
-
-- PDF yang berasal dari scan gambar mungkin tetap menghasilkan EPUB yang kurang rapi.
-- Untuk PDF scan, langkah OCR sebelum konversi akan memberi hasil jauh lebih baik.
-- Jika target utamanya Kindle, pertimbangkan juga output KEPUB/AZW3 di iterasi berikutnya.
+- Scanned PDFs may produce lower-quality EPUBs. Enabling OCR before conversion helps significantly.
+- Calibre handles most layout, image, and metadata edge cases well for this use case.

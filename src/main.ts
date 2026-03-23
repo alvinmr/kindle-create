@@ -55,6 +55,12 @@ interface ConversionProgressEvent {
   detail: string | null;
 }
 
+interface DownloadProgressEvent {
+  downloadedBytes: number;
+  totalBytes: number | null;
+  stage: string;
+}
+
 interface JobHistoryEntry {
   id: string;
   inputPath: string;
@@ -181,6 +187,11 @@ let isBusy = false;
 let isConverting = false;
 let isCancelling = false;
 let lastOutputPath = "";
+
+let isDownloadingCalibre = false;
+let calibreDownloadSkipped = false;
+const CALIBRE_SKIP_KEY = "kindle-create.calibre-download-skipped";
+calibreDownloadSkipped = localStorage.getItem(CALIBRE_SKIP_KEY) === "true";
 
 const PRESET_STORAGE_KEY = "kindle-create.output-preset";
 const KINDLE_STORAGE_KEY = "kindle-create.kindle-profile";
@@ -556,7 +567,47 @@ const setKindleProfile = (profile: KindleProfile) => {
   syncKindleUi();
 };
 
+const downloadCalibre = async () => {
+  if (isDownloadingCalibre) return;
+  isDownloadingCalibre = true;
+  dependencyStatus.dataset.state = "loading";
+  dependencyPill.textContent = "Downloading";
+  dependencyPill.dataset.state = "running";
+  dependencyStatus.innerHTML = `
+    <p>Mengunduh Calibre...</p>
+    <div id="calibre-download-bar" style="margin-top:8px;height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden">
+      <div id="calibre-download-fill" style="height:100%;width:0%;background:var(--accent);transition:width 0.3s"></div>
+    </div>
+    <p class="subtle" id="calibre-download-detail">Memulai unduhan...</p>
+  `;
+
+  try {
+    await invoke<string>("download_calibre");
+    dependencyStatus.innerHTML = `
+      <p>Calibre DMG sudah dibuka. Drag Calibre ke folder Applications, lalu klik tombol di bawah untuk memeriksa ulang.</p>
+    `;
+    dependencyPill.textContent = "Install Pending";
+    dependencyPill.dataset.state = "running";
+  } catch (error) {
+    dependencyStatus.innerHTML = `<p>Gagal mengunduh Calibre: ${String(error)}</p>`;
+    dependencyPill.textContent = "Download Failed";
+    dependencyPill.dataset.state = "error";
+  } finally {
+    isDownloadingCalibre = false;
+  }
+};
+
+const skipCalibreDownload = () => {
+  calibreDownloadSkipped = true;
+  localStorage.setItem(CALIBRE_SKIP_KEY, "true");
+  dependencyStatus.innerHTML = `
+    <p>Calibre belum terinstall. Konversi tidak bisa dilakukan tanpa Calibre.</p>
+  `;
+};
+
 const setDependencyMessage = (status: DependencyStatus) => {
+  if (isDownloadingCalibre) return;
+
   currentDependencyStatus = status;
   dependencyStatus.dataset.state = status.available ? "ready" : "error";
   dependencyTitle.textContent = status.available ? "Calibre siap dipakai" : "Calibre belum siap";
@@ -564,10 +615,28 @@ const setDependencyMessage = (status: DependencyStatus) => {
   dependencyVersion.textContent = status.version ?? "Belum terdeteksi";
   dependencyPill.textContent = status.available ? "Ready" : "Needs Setup";
   dependencyPill.dataset.state = status.available ? "success" : "error";
-  dependencyStatus.innerHTML = `
-    <p>${status.message}</p>
-    ${status.version ? `<p class="subtle">Versi terdeteksi: ${status.version}</p>` : ""}
-  `;
+
+  if (status.available) {
+    dependencyStatus.innerHTML = `
+      <p>${status.message}</p>
+      ${status.version ? `<p class="subtle">Versi terdeteksi: ${status.version}</p>` : ""}
+    `;
+  } else if (!calibreDownloadSkipped) {
+    dependencyStatus.innerHTML = `
+      <p>Calibre diperlukan untuk konversi PDF ke EPUB. Download sekarang? (~150 MB)</p>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="download-calibre-btn" class="button primary" type="button">Download Calibre</button>
+        <button id="skip-calibre-btn" class="button" type="button">Nanti Saja</button>
+      </div>
+    `;
+    document.getElementById("download-calibre-btn")?.addEventListener("click", downloadCalibre);
+    document.getElementById("skip-calibre-btn")?.addEventListener("click", skipCalibreDownload);
+  } else {
+    dependencyStatus.innerHTML = `
+      <p>${status.message}</p>
+    `;
+  }
+
   updateWizardState();
 };
 
@@ -1290,6 +1359,25 @@ void listen<ConversionProgressEvent>("conversion-progress", (event) => {
 
   if (detail) {
     appendLogLine(detail, payload.stage === "error" ? "error" : payload.stage === "success" ? "success" : "running");
+  }
+});
+
+listen<DownloadProgressEvent>("calibre-download-progress", (event) => {
+  const fill = document.getElementById("calibre-download-fill");
+  const detail = document.getElementById("calibre-download-detail");
+  if (!fill || !detail) return;
+
+  const { downloadedBytes, totalBytes, stage } = event.payload;
+
+  if (stage === "downloading" && totalBytes) {
+    const percent = Math.round((downloadedBytes / totalBytes) * 100);
+    fill.style.width = `${percent}%`;
+    const mb = (downloadedBytes / 1024 / 1024).toFixed(1);
+    const totalMb = (totalBytes / 1024 / 1024).toFixed(1);
+    detail.textContent = `${mb} MB / ${totalMb} MB (${percent}%)`;
+  } else if (stage === "downloading") {
+    const mb = (downloadedBytes / 1024 / 1024).toFixed(1);
+    detail.textContent = `${mb} MB diunduh...`;
   }
 });
 

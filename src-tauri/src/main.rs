@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use base64::Engine;
+use futures_util::StreamExt;
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::fs;
@@ -12,6 +13,7 @@ use std::thread;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use tauri::async_runtime;
 use tauri::{AppHandle, Emitter, Manager, State};
+use tokio::io::AsyncWriteExt;
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -125,6 +127,14 @@ struct ConversionProgressEvent {
     stage: String,
     message: String,
     detail: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DownloadProgressEvent {
+    downloaded_bytes: u64,
+    total_bytes: Option<u64>,
+    stage: String,
 }
 
 #[derive(Default)]
@@ -597,6 +607,68 @@ fn check_dependencies(app: AppHandle) -> Result<DependencyStatus, String> {
             ),
         }),
     }
+}
+
+#[tauri::command]
+async fn download_calibre(app: AppHandle) -> Result<String, String> {
+    let url = "https://calibre-ebook.com/dist/osx";
+
+    let client = reqwest::Client::builder()
+        .redirect(reqwest::redirect::Policy::limited(10))
+        .build()
+        .map_err(|e| format!("Gagal membuat HTTP client: {e}"))?;
+
+    let response = client
+        .get(url)
+        .send()
+        .await
+        .map_err(|e| format!("Gagal mengunduh Calibre: {e}"))?;
+
+    if !response.status().is_success() {
+        return Err(format!("Server mengembalikan status {}", response.status()));
+    }
+
+    let total_bytes = response.content_length();
+    let dmg_path = app_temp_dir()?.join("calibre.dmg");
+
+    let mut file = tokio::fs::File::create(&dmg_path)
+        .await
+        .map_err(|e| format!("Gagal membuat file temporary: {e}"))?;
+
+    let mut stream = response.bytes_stream();
+    let mut downloaded: u64 = 0;
+
+    while let Some(chunk) = stream.next().await {
+        let chunk = chunk.map_err(|e| format!("Gagal mengunduh: {e}"))?;
+        file.write_all(&chunk)
+            .await
+            .map_err(|e| format!("Gagal menulis file: {e}"))?;
+        downloaded += chunk.len() as u64;
+
+        let _ = app.emit("calibre-download-progress", DownloadProgressEvent {
+            downloaded_bytes: downloaded,
+            total_bytes,
+            stage: "downloading".to_string(),
+        });
+    }
+
+    file.flush()
+        .await
+        .map_err(|e| format!("Gagal menyimpan file: {e}"))?;
+
+    // Open the DMG so user can drag-install
+    std::process::Command::new("open")
+        .arg(&dmg_path)
+        .spawn()
+        .map_err(|e| format!("Gagal membuka DMG: {e}"))?;
+
+    let _ = app.emit("calibre-download-progress", DownloadProgressEvent {
+        downloaded_bytes: downloaded,
+        total_bytes,
+        stage: "done".to_string(),
+    });
+
+    Ok(dmg_path.to_string_lossy().to_string())
 }
 
 fn inspect_pdf_impl(app: AppHandle, request: String) -> Result<PdfMetadata, String> {
@@ -1072,6 +1144,7 @@ fn main() {
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             check_dependencies,
+            download_calibre,
             inspect_pdf,
             preview_pdf_page,
             convert_pdf_to_epub,
